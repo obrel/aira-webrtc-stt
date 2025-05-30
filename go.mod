@@ -25,6 +25,7 @@ require (
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
+	github.com/gorilla/websocket v1.5.3
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/obrel/go-lib v0.0.0-20220721023024-3cc10c3cebed
 	github.com/pion/datachannel v1.5.10 // indirect

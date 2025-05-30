@@ -31,7 +31,6 @@ func (st *GoogleStream) Recv(res chan transcribe.Result, done chan bool) error {
 		select {
 		case stop := <-done:
 			if stop {
-				fmt.Println("AS1")
 				return nil
 			}
 		default:
@@ -66,9 +65,5 @@ func (st *GoogleStream) Results() <-chan transcribe.Result {
 }
 
 func (st *GoogleStream) Close() error {
-	if err := st.stream.CloseSend(); err != nil {
-		return err
-	}
-
-	return nil
+	return st.stream.CloseSend()
 }
