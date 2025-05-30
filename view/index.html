@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="AIRA STT">
+  <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+  <title>AIRA STT</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+
+<body>
+  <div id="container">
+    <h1><a href="#" title="AIRA STT">AIRA</a> <span>Speech-to-text</span></h1>
+    <div id="audio">
+      <audio id="audio" autoplay controls muted></audio>
+    </div>
+    <div id="buttons">
+      <button id="startButton">Start</button>
+    </div>
+    <p>Transcription results:</p>
+    <div id="preview">
+      <ul id="results"></ul>
+    </div>
+  </div>
+  <script src="https://unpkg.com/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>
