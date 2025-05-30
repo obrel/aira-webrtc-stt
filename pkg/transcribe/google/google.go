@@ -14,6 +14,18 @@ type GoogleTranscriber struct {
 	ctx          context.Context
 }
 
+func NewGoogleSpeech(ctx context.Context, credentials string) (transcribe.Service, error) {
+	speechClient, err := speech.NewClient(ctx, option.WithCredentialsFile(credentials))
+	if err != nil {
+		return nil, err
+	}
+
+	return &GoogleTranscriber{
+		speechClient: speechClient,
+		ctx:          ctx,
+	}, nil
+}
+
 func (t *GoogleTranscriber) CreateStream() (transcribe.Stream, error) {
 	stream, err := t.speechClient.StreamingRecognize(t.ctx)
 	if err != nil {
@@ -38,16 +50,5 @@ func (t *GoogleTranscriber) CreateStream() (transcribe.Stream, error) {
 	return &GoogleStream{
 		stream:  stream,
 		results: make(chan transcribe.Result),
-	}, nil
-}
-
-func NewGoogleSpeech(ctx context.Context, credentials string) (transcribe.Service, error) {
-	speechClient, err := speech.NewClient(ctx, option.WithCredentialsFile(credentials))
-	if err != nil {
-		return nil, err
-	}
-	return &GoogleTranscriber{
-		speechClient: speechClient,
-		ctx:          ctx,
 	}, nil
 }
