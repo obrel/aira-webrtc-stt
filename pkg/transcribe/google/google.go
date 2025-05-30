@@ -4,7 +4,7 @@ import (
 	"context"
 
 	speech "cloud.google.com/go/speech/apiv1"
-	"github.com/obrel/aira-websocket-stt/internal/transcribe"
+	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
 	"google.golang.org/api/option"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )

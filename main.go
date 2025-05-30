@@ -12,8 +12,8 @@ import (
 
 	"github.com/obrel/aira-websocket-stt/internal/handler"
 	"github.com/obrel/aira-websocket-stt/internal/sfu"
-	"github.com/obrel/aira-websocket-stt/internal/transcribe"
-	"github.com/obrel/aira-websocket-stt/internal/transcribe/google"
+	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
+	"github.com/obrel/aira-websocket-stt/pkg/transcribe/google"
 	"github.com/obrel/go-lib/pkg/log"
 )
 

@@ -5,7 +5,7 @@ import (
 	"io"
 	"log"
 
-	"github.com/obrel/aira-websocket-stt/internal/transcribe"
+	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 

@@ -1,6 +1,6 @@
 package handler
 
-import "github.com/obrel/aira-websocket-stt/internal/transcribe"
+import "github.com/obrel/aira-websocket-stt/pkg/transcribe"
 
 type newSessionRequest struct {
 	Offer string `json:"offer"`

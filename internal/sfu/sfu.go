@@ -1,7 +1,7 @@
 package sfu
 
 import (
-	"github.com/obrel/aira-websocket-stt/internal/transcribe"
+	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
 	"github.com/obrel/go-lib/pkg/log"
 	"github.com/pion/webrtc/v4"
 )

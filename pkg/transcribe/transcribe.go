@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/obrel/aira-websocket-stt/internal/decoder"
+	"github.com/obrel/aira-websocket-stt/pkg/decoder"
 	"github.com/obrel/go-lib/pkg/log"
 	"github.com/pion/webrtc/v4"
 )
