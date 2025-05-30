@@ -13,6 +13,7 @@ import (
 	"github.com/obrel/aira-websocket-stt/internal/handler"
 	"github.com/obrel/aira-websocket-stt/internal/sfu"
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
+	"github.com/obrel/aira-websocket-stt/pkg/transcribe/deepgram"
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe/google"
 	"github.com/obrel/go-lib/pkg/log"
 )
@@ -22,21 +23,34 @@ const (
 	defaultStunServer = "stun:stun.l.google.com:19302"
 )
 
+var (
+	googleCreds    *string
+	deepgramApiKey *string
+	tr             transcribe.Service
+	err            error
+)
+
 func main() {
 	httpPort := flag.String("http-port", httpDefaultPort, "HTTP listen port")
-	googleCreds := flag.String("google-creds", "", "Google credentials file")
+	googleCreds = flag.String("google-creds", "", "Google credentials file")
+	deepgramApiKey = flag.String("deepgram-api-key", "", "Deepgram api key")
 	flag.Parse()
-
-	if *googleCreds == "" {
-		log.For("aira", "main").Fatal("You need to specify the google credentials file.")
-	}
 
 	ctx := context.Background()
 	serverCtx, serverStopCtx := context.WithCancel(ctx)
 
-	tr, err := google.NewGoogleSpeech(ctx, *googleCreds)
-	if err != nil {
-		log.For("aira", "main").Fatal(err)
+	if *googleCreds != "" {
+		tr, err = google.NewGoogleSpeech(ctx, *googleCreds)
+		if err != nil {
+			log.For("aira", "main").Fatal(err)
+		}
+	} else if *deepgramApiKey != "" {
+		tr, err = deepgram.NewDeepgram(ctx, *deepgramApiKey)
+		if err != nil {
+			log.For("aira", "main").Fatal(err)
+		}
+	} else {
+		log.For("aira", "main").Fatal("You must specify google credentials or deepgram api key.")
 	}
 
 	sfu := sfu.NewSFU(tr, transcribe.Transcribe)
