@@ -8,9 +8,17 @@ This is a part of AIRA, WebRTC AI Voice Agent project that combines WebRTC, spee
 ## Architecture
 TODO
 
+## External Services
+This projects requires some external services to provide Speech-to-text capability. Currently it supports
+- Google STT V1
+- Deepgram STT
+- OpenAI STT
+
+Feel free to add more STT services.
+
 ## Requirements
 - Golang 1.23 above
-- Google Credentials (with Speech-to-text API enabled)
+- Service credentials (Google, Deepgram, or OpenAI)
 
 ## Running Locally
 ```
@@ -24,3 +32,6 @@ Open your browser, and go to http://localhost:4000. Click start, start talking, 
 
 ## TO DO
 Currently we only support Google Speech-to-text V1. But we want to provide another STT service to make it flexible.
+
+## LICENSE
+MIT
