@@ -2,7 +2,6 @@ package deepgram
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 
 	"github.com/gorilla/websocket"
@@ -35,8 +34,6 @@ func (st *DeepgramStream) Recv(res chan transcribe.Result, done chan bool) error
 			if err != nil && err != io.EOF {
 				return err
 			}
-
-			fmt.Println(string(resp))
 
 			result := &Result{}
 
