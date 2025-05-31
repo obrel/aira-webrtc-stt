@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -74,8 +75,11 @@ func (st *OpenAIStream) Recv(res chan transcribe.Result, done chan bool) error {
 			} else if result.Type == "conversation.item.input_audio_transcription.completed" {
 				log.Printf(result.Transcript)
 
+				// HACK: Sometimes it returns duplicate transcription with new line.
+				trans := strings.Split(result.Transcript, "\n")
+
 				res <- transcribe.Result{
-					Text:  result.Transcript,
+					Text:  trans[0],
 					Final: true,
 				}
 			}
