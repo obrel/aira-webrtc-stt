@@ -2,6 +2,7 @@ package google
 
 import (
 	"context"
+	"sync"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
@@ -37,7 +38,7 @@ func (t *GoogleTranscriber) CreateStream() (transcribe.Stream, error) {
 			StreamingConfig: &speechpb.StreamingRecognitionConfig{
 				Config: &speechpb.RecognitionConfig{
 					Encoding:          speechpb.RecognitionConfig_LINEAR16,
-					SampleRateHertz:   48000,
+					SampleRateHertz:   24000,
 					LanguageCode:      "id",
 					AudioChannelCount: 1,
 				},
@@ -50,5 +51,7 @@ func (t *GoogleTranscriber) CreateStream() (transcribe.Stream, error) {
 	return &GoogleStream{
 		stream:  stream,
 		results: make(chan transcribe.Result),
+		ready:   false,
+		mu:      sync.Mutex{},
 	}, nil
 }

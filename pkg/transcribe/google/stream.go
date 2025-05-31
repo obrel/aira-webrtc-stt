@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"sync"
 
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
@@ -12,6 +13,8 @@ import (
 type GoogleStream struct {
 	stream  speechpb.Speech_StreamingRecognizeClient
 	results chan transcribe.Result
+	ready   bool
+	mu      sync.Mutex
 }
 
 func (st *GoogleStream) Write(buffer []byte) (int, error) {
