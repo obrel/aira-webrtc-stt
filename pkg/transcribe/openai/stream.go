@@ -3,7 +3,6 @@ package openai
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"sync"
 
@@ -73,14 +72,12 @@ func (st *OpenAIStream) Recv(res chan transcribe.Result, done chan bool) error {
 					log.For("openai", "receive").Error(err)
 				}
 			} else if result.Type == "conversation.item.input_audio_transcription.completed" {
-				//log.Printf(result.Transcript)
+				log.Printf(result.Transcript)
 
 				res <- transcribe.Result{
 					Text:  result.Transcript,
 					Final: true,
 				}
-
-				fmt.Println(string(resp))
 			}
 		}
 	}
