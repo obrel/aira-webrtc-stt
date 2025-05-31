@@ -31,7 +31,7 @@ $ go run main.go --google-creds <credentials.json>
 Open your browser, and go to http://localhost:4000. Click start, start talking, and you'll be receive the transcription text.
 
 ## TO DO
-Currently we only support Google Speech-to-text V1. But we want to provide another STT service to make it flexible.
+Some of configurations are harcoded (language, model, encoding, sample rate, etc). Need to make them configurable using feature flags or config file.
 
 ## LICENSE
 MIT
