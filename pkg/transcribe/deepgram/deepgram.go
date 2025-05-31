@@ -2,6 +2,7 @@ package deepgram
 
 import (
 	"context"
+	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
@@ -15,7 +16,7 @@ type DeepgramTranscriber struct {
 func NewDeepgram(ctx context.Context, apiKey string) (transcribe.Service, error) {
 	websocket.DefaultDialer.Subprotocols = []string{"token", apiKey}
 
-	client, _, err := websocket.DefaultDialer.Dial("wss://api.deepgram.com/v1/listen?model=nova-2&language=id&encoding=linear16&sample_rate=48000", nil)
+	client, _, err := websocket.DefaultDialer.Dial("wss://api.deepgram.com/v1/listen?model=nova-2&language=id&encoding=linear16&sample_rate=24000", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -30,5 +31,7 @@ func (t *DeepgramTranscriber) CreateStream() (transcribe.Stream, error) {
 	return &DeepgramStream{
 		stream:  t.client,
 		results: make(chan transcribe.Result),
+		ready:   false,
+		mu:      sync.Mutex{},
 	}, nil
 }

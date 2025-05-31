@@ -3,6 +3,7 @@ package deepgram
 import (
 	"encoding/json"
 	"io"
+	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
@@ -12,9 +13,14 @@ import (
 type DeepgramStream struct {
 	stream  *websocket.Conn
 	results chan transcribe.Result
+	ready   bool
+	mu      sync.Mutex
 }
 
 func (st *DeepgramStream) Write(buffer []byte) (int, error) {
+	st.mu.Lock()
+	defer st.mu.Unlock()
+
 	if err := st.stream.WriteMessage(websocket.BinaryMessage, buffer); err != nil {
 		return 0, err
 	}
