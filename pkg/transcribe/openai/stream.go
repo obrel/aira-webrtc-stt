@@ -20,10 +20,15 @@ type Data struct {
 type OpenAIStream struct {
 	stream  *websocket.Conn
 	results chan transcribe.Result
+	ready   bool
 	mu      sync.Mutex
 }
 
 func (st *OpenAIStream) Write(buffer []byte) (int, error) {
+	if !st.ready {
+		return 0, nil
+	}
+
 	st.mu.Lock()
 	defer st.mu.Unlock()
 
@@ -66,6 +71,7 @@ func (st *OpenAIStream) Recv(res chan transcribe.Result, done chan bool) error {
 			}
 
 			if result.Type == "transcription_session.created" {
+				st.ready = true
 				msg := `{"type":"transcription_session.update","session":{"input_audio_format":"pcm16","input_audio_transcription":{"model":"gpt-4o-transcribe","prompt":"","language":"id"},"turn_detection":{"type":"server_vad","threshold":0.5,"prefix_padding_ms":300,"silence_duration_ms":500},"input_audio_noise_reduction":{"type":"near_field"}}}`
 
 				err := st.stream.WriteMessage(websocket.TextMessage, []byte(msg))

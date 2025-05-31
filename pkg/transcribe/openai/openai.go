@@ -35,6 +35,7 @@ func (t *OpenAITranscriber) CreateStream() (transcribe.Stream, error) {
 	return &OpenAIStream{
 		stream:  t.client,
 		results: make(chan transcribe.Result),
+		ready:   false,
 		mu:      sync.Mutex{},
 	}, nil
 }
