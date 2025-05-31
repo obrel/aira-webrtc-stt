@@ -11,7 +11,7 @@ type Decoder struct {
 }
 
 func NewDecoder() (*Decoder, error) {
-	opusd, err := opus.NewDecoder(48000, 1)
+	opusd, err := opus.NewDecoder(24000, 1)
 	if err != nil {
 		return nil, err
 	}

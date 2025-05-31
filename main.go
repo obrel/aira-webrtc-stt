@@ -15,6 +15,7 @@ import (
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe/deepgram"
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe/google"
+	"github.com/obrel/aira-websocket-stt/pkg/transcribe/openai"
 	"github.com/obrel/go-lib/pkg/log"
 )
 
@@ -25,6 +26,7 @@ const (
 
 var (
 	googleCreds    *string
+	openaiApiKey   *string
 	deepgramApiKey *string
 	tr             transcribe.Service
 	err            error
@@ -33,6 +35,7 @@ var (
 func main() {
 	httpPort := flag.String("http-port", httpDefaultPort, "HTTP listen port")
 	googleCreds = flag.String("google-creds", "", "Google credentials file")
+	openaiApiKey = flag.String("openai-api-key", "", "OpenAI api key")
 	deepgramApiKey = flag.String("deepgram-api-key", "", "Deepgram api key")
 	flag.Parse()
 
@@ -41,6 +44,11 @@ func main() {
 
 	if *googleCreds != "" {
 		tr, err = google.NewGoogleSpeech(ctx, *googleCreds)
+		if err != nil {
+			log.For("aira", "main").Fatal(err)
+		}
+	} else if *openaiApiKey != "" {
+		tr, err = openai.NewOpenAI(ctx, *openaiApiKey)
 		if err != nil {
 			log.For("aira", "main").Fatal(err)
 		}
