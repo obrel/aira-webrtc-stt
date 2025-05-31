@@ -52,7 +52,13 @@ startButton.addEventListener('click', async () => {
       decodeDataChannelPayload(event.data).then(data => {
         const result = JSON.parse(data);
         const li = document.createElement('li');
-        li.appendChild(document.createTextNode(`${result.text} (${result.confidence*100}%)`));
+
+        if (typeof result.confidence != 'undefined') {
+          li.appendChild(document.createTextNode(`${result.text} (${result.confidence*100}%)`));
+        } else {
+          li.appendChild(document.createTextNode(result.text));
+        }
+
         results.appendChild(li);
       });
     };
