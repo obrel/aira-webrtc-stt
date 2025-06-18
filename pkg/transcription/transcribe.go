@@ -1,4 +1,4 @@
-package transcribe
+package transcription
 
 import (
 	"encoding/json"
@@ -11,16 +11,16 @@ import (
 	"github.com/pion/webrtc/v4"
 )
 
-func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel) error {
-	decoder, err := decoder.NewDecoder(24000)
+func Transcribe(transcription Transcription, sampleRate int, track *webrtc.TrackRemote, dc *webrtc.DataChannel) error {
+	decoder, err := decoder.NewDecoder(sampleRate)
 	if err != nil {
 		return err
 	}
 
 	defer func() {
-		err := stream.Close()
+		err := transcription.Close()
 		if err != nil {
-			log.For("sfu", "track").Error(err)
+			log.For("transcription", "transcribe").Error(err)
 			return
 		}
 
@@ -35,9 +35,9 @@ func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel
 	timer := time.NewTimer(5 * time.Second)
 
 	go func() {
-		err := stream.Recv(result, done)
+		err := transcription.Receive(result, done)
 		if err != nil {
-			log.For("sfu", "track").Error(err)
+			log.For("transcription", "transcribe").Error(err)
 			return
 		}
 	}()
@@ -65,8 +65,6 @@ func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel
 		}
 	}()
 
-	err = nil
-
 	for {
 		select {
 		case audioChunk := <-audioStream:
@@ -78,7 +76,7 @@ func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel
 					return err
 				}
 
-				_, err = stream.Write(payload)
+				_, err = transcription.Write(payload)
 				if err != nil {
 					return err
 				}
@@ -91,7 +89,7 @@ func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel
 
 			err = dc.Send(msg)
 			if err != nil {
-				log.For("sfu", "track").Error(err)
+				log.For("transcription", "transcribe").Error(err)
 			}
 		case <-done:
 			return nil
@@ -102,4 +100,7 @@ func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel
 			return err
 		}
 	}
+
+	fmt.Println("ASU")
+	return nil
 }

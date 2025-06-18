@@ -11,7 +11,3 @@ type PeerConnection interface {
 	GetAnswer() (string, error)
 	SetAnswer(answer string) error
 }
-
-type Service interface {
-	CreatePeerConnection() (PeerConnection, error)
-}

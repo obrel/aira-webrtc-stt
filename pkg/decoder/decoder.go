@@ -10,8 +10,8 @@ type Decoder struct {
 	samples []int16
 }
 
-func NewDecoder() (*Decoder, error) {
-	opusd, err := opus.NewDecoder(24000, 1)
+func NewDecoder(rate int) (*Decoder, error) {
+	opusd, err := opus.NewDecoder(rate, 1)
 	if err != nil {
 		return nil, err
 	}
