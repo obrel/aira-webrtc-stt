@@ -13,6 +13,7 @@ import (
 	"github.com/obrel/aira-websocket-stt/internal/handler"
 	"github.com/obrel/aira-websocket-stt/internal/sfu"
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
+	"github.com/obrel/aira-websocket-stt/pkg/transcribe/cartesia"
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe/deepgram"
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe/google"
 	"github.com/obrel/aira-websocket-stt/pkg/transcribe/openai"
@@ -28,6 +29,7 @@ var (
 	googleCreds    *string
 	openaiApiKey   *string
 	deepgramApiKey *string
+	cartesiaApiKey *string
 	tr             transcribe.Service
 	err            error
 )
@@ -37,6 +39,7 @@ func main() {
 	googleCreds = flag.String("google-creds", "", "Google credentials file")
 	openaiApiKey = flag.String("openai-api-key", "", "OpenAI api key")
 	deepgramApiKey = flag.String("deepgram-api-key", "", "Deepgram api key")
+	cartesiaApiKey = flag.String("cartesia-api-key", "", "Cartesia api key")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -57,8 +60,13 @@ func main() {
 		if err != nil {
 			log.For("aira", "main").Fatal(err)
 		}
+	} else if *cartesiaApiKey != "" {
+		tr, err = cartesia.NewCartesia(ctx, *cartesiaApiKey)
+		if err != nil {
+			log.For("aira", "main").Fatal(err)
+		}
 	} else {
-		log.For("aira", "main").Fatal("You must specify google credentials or deepgram api key.")
+		log.For("aira", "main").Fatal("You must specify STT service credential.")
 	}
 
 	sfu := sfu.NewSFU(tr, transcribe.Transcribe)
