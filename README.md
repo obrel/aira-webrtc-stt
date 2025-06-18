@@ -13,12 +13,13 @@ This projects requires some external services to provide Speech-to-text capabili
 - Google STT V1
 - Deepgram STT
 - OpenAI STT
+- Cartesia STT
 
 Feel free to add more STT services.
 
 ## Requirements
 - Golang 1.23 above
-- Service credentials (Google, Deepgram, or OpenAI)
+- Service credentials (Google, Deepgram, OpenAI, or Cartesia)
 
 ## Running Locally
 ```
