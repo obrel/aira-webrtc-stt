@@ -13,7 +13,6 @@ import (
 type DeepgramStream struct {
 	stream  *websocket.Conn
 	results chan transcribe.Result
-	ready   bool
 	mu      sync.Mutex
 }
 
@@ -45,7 +44,7 @@ func (st *DeepgramStream) Recv(res chan transcribe.Result, done chan bool) error
 
 			err = json.Unmarshal(resp, result)
 			if err != nil {
-				log.For("deepgrap", "receive").Error(err)
+				log.For("cartesia", "receive").Error(err)
 				continue
 			}
 

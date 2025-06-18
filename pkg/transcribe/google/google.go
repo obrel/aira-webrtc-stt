@@ -51,7 +51,6 @@ func (t *GoogleTranscriber) CreateStream() (transcribe.Stream, error) {
 	return &GoogleStream{
 		stream:  stream,
 		results: make(chan transcribe.Result),
-		ready:   false,
 		mu:      sync.Mutex{},
 	}, nil
 }

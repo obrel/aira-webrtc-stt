@@ -31,7 +31,6 @@ func (t *DeepgramTranscriber) CreateStream() (transcribe.Stream, error) {
 	return &DeepgramStream{
 		stream:  t.client,
 		results: make(chan transcribe.Result),
-		ready:   false,
 		mu:      sync.Mutex{},
 	}, nil
 }
