@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/obrel/aira-websocket-stt/internal/handler"
-	"github.com/obrel/aira-websocket-stt/internal/sfu"
+	"github.com/obrel/aira-websocket-stt/example/pkg/handler"
+	"github.com/obrel/aira-websocket-stt/example/pkg/sfu"
 	"github.com/obrel/aira-websocket-stt/pkg/transcription"
 	"github.com/obrel/aira-websocket-stt/pkg/transcription/service/cartesia"
 	"github.com/obrel/go-lib/pkg/log"
@@ -45,15 +45,8 @@ func main() {
 		log.For("aira", "main").Fatal(err)
 	}
 
-	sfu := sfu.NewSFU()
+	sfu := sfu.NewSFU(tr)
 	server := &http.Server{Addr: fmt.Sprintf(":%v", *httpPort), Handler: handler.NewHandler(sfu)}
-
-	go func() {
-		err := transcription.Transcribe(tr, 16000, <-sfu.TrackRemote, <-sfu.DataChannel)
-		if err != nil {
-			log.For("aira", "main").Fatal(err)
-		}
-	}()
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)

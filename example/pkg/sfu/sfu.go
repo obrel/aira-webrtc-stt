@@ -1,19 +1,19 @@
 package sfu
 
 import (
+	"github.com/obrel/aira-websocket-stt/example/pkg/transcriber"
+	"github.com/obrel/aira-websocket-stt/pkg/transcription"
 	"github.com/obrel/go-lib/pkg/log"
 	"github.com/pion/webrtc/v4"
 )
 
 type SFU struct {
-	TrackRemote chan *webrtc.TrackRemote
-	DataChannel chan *webrtc.DataChannel
+	transcription transcription.Transcription
 }
 
-func NewSFU() *SFU {
+func NewSFU(transcription transcription.Transcription) *SFU {
 	return &SFU{
-		TrackRemote: make(chan *webrtc.TrackRemote),
-		DataChannel: make(chan *webrtc.DataChannel),
+		transcription: transcription,
 	}
 }
 
@@ -36,8 +36,10 @@ func (s *SFU) CreatePeerConnection() (PeerConnection, error) {
 	pc.OnTrack(func(track *webrtc.TrackRemote, r *webrtc.RTPReceiver) {
 		log.Printf("Received audio (%s) track, id = %s\n", track.Codec().MimeType, track.ID())
 
-		s.TrackRemote <- track
-		s.DataChannel = dataChan
+		err := transcriber.Transcribe(s.transcription, 16000, track, <-dataChan)
+		if err != nil {
+			log.For("sfu", "peer").Fatal(err)
+		}
 	})
 
 	pc.OnICEConnectionStateChange(func(connState webrtc.ICEConnectionState) {

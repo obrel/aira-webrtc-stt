@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/obrel/aira-websocket-stt/internal/sfu"
+	"github.com/obrel/aira-websocket-stt/example/pkg/sfu"
 )
 
 func NewHandler(sfu *sfu.SFU) http.Handler {
