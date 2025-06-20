@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -15,12 +16,26 @@ const baseURL = "wss://api.cartesia.ai/stt/websocket?cartesia_version=2024-11-13
 
 type Cartesia struct {
 	apiKey     string
+	dialURL    string
 	model      string
 	language   string
 	encoding   string
 	sampleRate int
 	wsClient   *websocket.Conn
 	lock       sync.Mutex
+}
+
+func (c *Cartesia) Connect() error {
+	var err error
+	var res *http.Response
+
+	c.wsClient, res, err = websocket.DefaultDialer.Dial(c.dialURL, nil)
+	if err != nil {
+		log.For("cartesia", "connect").Error(res.Status)
+		return err
+	}
+
+	return nil
 }
 
 func (c *Cartesia) Write(stream []byte) (int, error) {
@@ -37,11 +52,8 @@ func (c *Cartesia) Write(stream []byte) (int, error) {
 func (c *Cartesia) Receive(res chan transcription.Result, done chan bool) error {
 	for {
 		select {
-		case stop := <-done:
-			fmt.Println("BAJING")
-			if stop {
-				return nil
-			}
+		case <-done:
+			return nil
 		default:
 			_, resp, err := c.wsClient.ReadMessage()
 			if err != nil && err != io.EOF {
@@ -69,12 +81,12 @@ func (c *Cartesia) Receive(res chan transcription.Result, done chan bool) error 
 }
 
 func (c *Cartesia) Close() error {
+	_ = c.wsClient.WriteMessage(websocket.TextMessage, []byte("done"))
 	return c.wsClient.Close()
 }
 
 func init() {
 	transcription.Register("cartesia", func(opts ...transcription.Option) (transcription.Transcription, error) {
-		var err error
 		s := &Cartesia{
 			lock: sync.Mutex{},
 		}
@@ -88,7 +100,7 @@ func init() {
 			}
 		}
 
-		dialURL := fmt.Sprintf("%s&api_key=%s&model=%s&language=%s&encoding=%s&sample_rate=%v",
+		s.dialURL = fmt.Sprintf("%s&api_key=%s&model=%s&language=%s&encoding=%s&sample_rate=%v",
 			baseURL,
 			s.apiKey,
 			s.model,
@@ -96,11 +108,6 @@ func init() {
 			s.encoding,
 			s.sampleRate,
 		)
-
-		s.wsClient, _, err = websocket.DefaultDialer.Dial(dialURL, nil)
-		if err != nil {
-			return nil, err
-		}
 
 		return s, nil
 	})

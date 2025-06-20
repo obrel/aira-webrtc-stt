@@ -16,6 +16,7 @@ type Option interface{}
 type Factory func(...Option) (Transcription, error)
 
 type Transcription interface {
+	Connect() error
 	Write(stream []byte) (int, error)
 	Receive(chan Result, chan bool) error
 	Close() error
