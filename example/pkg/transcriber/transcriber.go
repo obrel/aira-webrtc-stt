@@ -12,7 +12,7 @@ import (
 	"github.com/pion/webrtc/v4"
 )
 
-func Transcribe(trans transcription.Transcription, sampleRate int, track *webrtc.TrackRemote, dc *webrtc.DataChannel) error {
+func Transcribe(trans transcription.Transcription, sampleRate int, track *webrtc.TrackRemote, dc *webrtc.DataChannel, stop chan bool) error {
 	decoder, err := decoder.NewDecoder(sampleRate)
 	if err != nil {
 		return err
@@ -37,8 +37,7 @@ func Transcribe(trans transcription.Transcription, sampleRate int, track *webrtc
 	audioStream := make(chan []byte)
 	response := make(chan bool)
 	result := make(chan transcription.Result)
-	doneWrite := make(chan bool)
-	doneTranscribe := make(chan bool)
+	doneTranscribe := make(chan bool, 1)
 	timer := time.NewTimer(5 * time.Second)
 
 	go func() {
@@ -59,7 +58,6 @@ func Transcribe(trans transcription.Transcription, sampleRate int, track *webrtc
 
 				if err == io.EOF {
 					doneTranscribe <- true
-					doneWrite <- true
 					return
 				}
 
@@ -100,7 +98,7 @@ func Transcribe(trans transcription.Transcription, sampleRate int, track *webrtc
 					log.For("transcriber", "transcribe").Error(err)
 				}
 			}
-		case <-doneWrite:
+		case <-stop:
 			return nil
 		case <-timer.C:
 			return fmt.Errorf("Read operation timed out")

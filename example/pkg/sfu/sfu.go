@@ -24,6 +24,7 @@ func (s *SFU) CreatePeerConnection() (PeerConnection, error) {
 	}
 
 	dataChan := make(chan *webrtc.DataChannel)
+	stop := make(chan bool, 1)
 
 	_, err = pc.AddTransceiverFromKind(webrtc.RTPCodecTypeAudio, webrtc.RTPTransceiverInit{
 		Direction: webrtc.RTPTransceiverDirectionRecvonly,
@@ -36,7 +37,7 @@ func (s *SFU) CreatePeerConnection() (PeerConnection, error) {
 	pc.OnTrack(func(track *webrtc.TrackRemote, r *webrtc.RTPReceiver) {
 		log.Printf("Received audio (%s) track, id = %s\n", track.Codec().MimeType, track.ID())
 
-		err := transcriber.Transcribe(s.transcription, 16000, track, <-dataChan)
+		err := transcriber.Transcribe(s.transcription, 16000, track, <-dataChan, stop)
 		if err != nil {
 			log.For("sfu", "peer").Fatal(err)
 		}
@@ -44,6 +45,10 @@ func (s *SFU) CreatePeerConnection() (PeerConnection, error) {
 
 	pc.OnICEConnectionStateChange(func(connState webrtc.ICEConnectionState) {
 		log.Printf("Connection state: %s \n", connState.String())
+
+		if connState == webrtc.ICEConnectionStateClosed {
+			stop <- true
+		}
 	})
 
 	pc.OnDataChannel(func(dc *webrtc.DataChannel) {
