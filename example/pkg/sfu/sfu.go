@@ -1,20 +1,19 @@
 package sfu
 
 import (
-	"github.com/obrel/aira-websocket-stt/pkg/transcribe"
+	"github.com/obrel/aira-websocket-stt/example/pkg/transcriber"
+	"github.com/obrel/aira-websocket-stt/pkg/transcription"
 	"github.com/obrel/go-lib/pkg/log"
 	"github.com/pion/webrtc/v4"
 )
 
 type SFU struct {
-	transcriber  transcribe.Service
-	trackHandler func(transcribe.Stream, *webrtc.TrackRemote, *webrtc.DataChannel) error
+	transcription transcription.Transcription
 }
 
-func NewSFU(transcriber transcribe.Service, trackHandler func(transcribe.Stream, *webrtc.TrackRemote, *webrtc.DataChannel) error) Service {
+func NewSFU(transcription transcription.Transcription) *SFU {
 	return &SFU{
-		transcriber:  transcriber,
-		trackHandler: trackHandler,
+		transcription: transcription,
 	}
 }
 
@@ -25,6 +24,7 @@ func (s *SFU) CreatePeerConnection() (PeerConnection, error) {
 	}
 
 	dataChan := make(chan *webrtc.DataChannel)
+	stop := make(chan bool, 1)
 
 	_, err = pc.AddTransceiverFromKind(webrtc.RTPCodecTypeAudio, webrtc.RTPTransceiverInit{
 		Direction: webrtc.RTPTransceiverDirectionRecvonly,
@@ -37,19 +37,18 @@ func (s *SFU) CreatePeerConnection() (PeerConnection, error) {
 	pc.OnTrack(func(track *webrtc.TrackRemote, r *webrtc.RTPReceiver) {
 		log.Printf("Received audio (%s) track, id = %s\n", track.Codec().MimeType, track.ID())
 
-		stream, err := s.transcriber.CreateStream()
+		err := transcriber.Transcribe(s.transcription, 16000, track, <-dataChan, stop)
 		if err != nil {
-			log.For("sfu", "peer").Error(err)
-		} else {
-			err := s.trackHandler(stream, track, <-dataChan)
-			if err != nil {
-				log.For("sfu", "peer").Error(err)
-			}
+			log.For("sfu", "peer").Fatal(err)
 		}
 	})
 
 	pc.OnICEConnectionStateChange(func(connState webrtc.ICEConnectionState) {
 		log.Printf("Connection state: %s \n", connState.String())
+
+		if connState == webrtc.ICEConnectionStateClosed {
+			stop <- true
+		}
 	})
 
 	pc.OnDataChannel(func(dc *webrtc.DataChannel) {

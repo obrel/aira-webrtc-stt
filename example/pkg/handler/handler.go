@@ -6,10 +6,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/obrel/aira-websocket-stt/internal/sfu"
+	"github.com/obrel/aira-websocket-stt/example/pkg/sfu"
 )
 
-func NewHandler(sfu sfu.Service) http.Handler {
+func NewHandler(sfu *sfu.SFU) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
@@ -49,7 +49,7 @@ func NewHandler(sfu sfu.Service) http.Handler {
 		w.Write(payload)
 	})
 
-	fs := http.FileServer(http.Dir("view"))
+	fs := http.FileServer(http.Dir("../view"))
 	r.Handle("/*", http.StripPrefix("/", fs))
 
 	return r

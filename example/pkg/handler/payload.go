@@ -1,6 +1,8 @@
 package handler
 
-import "github.com/obrel/aira-websocket-stt/pkg/transcribe"
+import (
+	"github.com/obrel/aira-websocket-stt/pkg/transcription"
+)
 
 type newSessionRequest struct {
 	Offer string `json:"offer"`
@@ -11,5 +13,5 @@ type newSessionResponse struct {
 }
 
 type newResultsResponse struct {
-	Results []transcribe.Result `json:"results"`
+	Results []transcription.Result `json:"results"`
 }

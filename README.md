@@ -10,10 +10,11 @@ TODO
 
 ## External Services
 This projects requires some external services to provide Speech-to-text capability. Currently it supports
-- Google STT V1
-- Deepgram STT
-- OpenAI STT
-- Cartesia STT
+- [Cartesia](example/cartesia/)
+- [Deepgram](example/deepgram/)
+- Elevenlabs (coming soon)
+- [Google](example/google/)
+- [OpenAI](example/openai/)
 
 Feel free to add more STT services.
 
@@ -21,18 +22,8 @@ Feel free to add more STT services.
 - Golang 1.23 above
 - Service credentials (Google, Deepgram, OpenAI, or Cartesia)
 
-## Running Locally
-```
-$ git clone git@github.com:obrel/aira-webrtc-stt.git
-$ cd aira-webrtc-stt
-$ go mod tidy
-$ go run main.go --google-creds <credentials.json>
-```
-
-Open your browser, and go to http://localhost:4000. Click start, start talking, and you'll be receive the transcription text.
-
-## TO DO
-Some of configurations are harcoded (language, model, encoding, sample rate, etc). Need to make them configurable using feature flags or config file.
+## Example
+Check [example](example/) directory to find out how to use this module.
 
 ## LICENSE
 MIT

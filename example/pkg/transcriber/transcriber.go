@@ -1,4 +1,4 @@
-package transcribe
+package transcriber
 
 import (
 	"encoding/json"
@@ -7,20 +7,26 @@ import (
 	"time"
 
 	"github.com/obrel/aira-websocket-stt/pkg/decoder"
+	"github.com/obrel/aira-websocket-stt/pkg/transcription"
 	"github.com/obrel/go-lib/pkg/log"
 	"github.com/pion/webrtc/v4"
 )
 
-func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel) error {
-	decoder, err := decoder.NewDecoder()
+func Transcribe(trans transcription.Transcription, sampleRate int, track *webrtc.TrackRemote, dc *webrtc.DataChannel, stop chan bool) error {
+	decoder, err := decoder.NewDecoder(sampleRate)
+	if err != nil {
+		return err
+	}
+
+	err = trans.Connect()
 	if err != nil {
 		return err
 	}
 
 	defer func() {
-		err := stream.Close()
+		err := trans.Close()
 		if err != nil {
-			log.For("sfu", "track").Error(err)
+			log.For("transcriber", "transcribe").Error(err)
 			return
 		}
 
@@ -30,14 +36,14 @@ func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel
 	errs := make(chan error, 2)
 	audioStream := make(chan []byte)
 	response := make(chan bool)
-	result := make(chan Result)
-	done := make(chan bool)
+	result := make(chan transcription.Result)
+	doneTranscribe := make(chan bool, 1)
 	timer := time.NewTimer(5 * time.Second)
 
 	go func() {
-		err := stream.Recv(result, done)
+		err := trans.Receive(result, doneTranscribe)
 		if err != nil {
-			log.For("sfu", "track").Error(err)
+			log.For("transcriber", "transcribe").Error(err)
 			return
 		}
 	}()
@@ -51,8 +57,7 @@ func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel
 				timer.Stop()
 
 				if err == io.EOF {
-					done <- true
-					close(audioStream)
+					doneTranscribe <- true
 					return
 				}
 
@@ -65,8 +70,6 @@ func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel
 		}
 	}()
 
-	err = nil
-
 	for {
 		select {
 		case audioChunk := <-audioStream:
@@ -78,7 +81,7 @@ func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel
 					return err
 				}
 
-				_, err = stream.Write(payload)
+				_, err = trans.Write(payload)
 				if err != nil {
 					return err
 				}
@@ -89,11 +92,13 @@ func Transcribe(stream Stream, track *webrtc.TrackRemote, dc *webrtc.DataChannel
 				continue
 			}
 
-			err = dc.Send(msg)
-			if err != nil {
-				log.For("sfu", "track").Error(err)
+			if string(msg) != "" {
+				err = dc.Send(msg)
+				if err != nil {
+					log.For("transcriber", "transcribe").Error(err)
+				}
 			}
-		case <-done:
+		case <-stop:
 			return nil
 		case <-timer.C:
 			return fmt.Errorf("Read operation timed out")
